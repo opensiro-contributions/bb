@@ -1480,7 +1480,7 @@ export function ThreadDetailPromptArea({
       handleSend,
       isFollowUpSubmitting,
       isHandoffSelection,
-      promptDraft,
+      normalPluginComposerHost,
       promptHistoryDrafts,
       promptPlaceholder,
       restoreHistoryDraft,
