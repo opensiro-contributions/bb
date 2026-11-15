@@ -170,7 +170,8 @@ export function ThreadBackgroundCommandsCard({
   const isCompactViewport = useIsCompactViewport();
   const cardRef = useRef<HTMLElement>(null!);
   const [isCompactCard, setIsCompactCard] = useState<boolean | null>(null);
-  const focus = useDisclosureFocusHandoff(isExpanded, onToggle);
+  const { triggerRef, collapseRef, onTriggerClick, onCollapseClick } =
+    useDisclosureFocusHandoff(isExpanded, onToggle);
   useResizeObserver({
     ref: cardRef,
     box: "border-box",
@@ -214,8 +215,8 @@ export function ThreadBackgroundCommandsCard({
                 ? compactLabel
                 : backgroundActivityAriaLabel(primary, groupLabel)
             }
-            ref={focus.triggerRef}
-            onClick={focus.onTriggerClick}
+            ref={triggerRef}
+            onClick={onTriggerClick}
             className={activityRowClass(
               "active",
               cn(
@@ -267,8 +268,8 @@ export function ThreadBackgroundCommandsCard({
           isExpanded={isExpanded}
           collapsedBorder="none"
           collapseLabel={`Collapse ${groupLabel.toLowerCase()}`}
-          collapseRef={focus.collapseRef}
-          onCollapse={focus.onCollapseClick}
+          collapseRef={collapseRef}
+          onCollapse={onCollapseClick}
         >
           <div className="flex flex-col gap-0.5 py-1">
             {expandedRows.map((row) => {

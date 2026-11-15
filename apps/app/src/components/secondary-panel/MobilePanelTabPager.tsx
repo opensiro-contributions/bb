@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@bb/shared-ui/button";
 import { Icon } from "@bb/shared-ui/icon";
 import { TabPill } from "@/components/ui/tab-pill";
@@ -60,9 +54,9 @@ export function MobilePanelTabPager({
   const previousTab = tabs[displayedIndex - 1];
   const nextTab = tabs[displayedIndex + 1];
 
-  useEffect(() => {
-    if (activeContentTabId !== null) setLastContentTabId(activeContentTabId);
-  }, [activeContentTabId]);
+  if (activeContentTabId !== null && activeContentTabId !== lastContentTabId) {
+    setLastContentTabId(activeContentTabId);
+  }
 
   useLayoutEffect(() => {
     const navigation = navigationRef.current;

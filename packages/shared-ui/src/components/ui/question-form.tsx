@@ -53,6 +53,18 @@ interface QuestionOptionRowProps {
   shortcut?: QuestionShortcut;
 }
 
+function autoGrowTextarea(
+  element: HTMLTextAreaElement,
+  minHeight: number,
+  maxHeight: number,
+): void {
+  element.style.height = "auto";
+  element.style.height = `${Math.min(
+    Math.max(element.scrollHeight, minHeight),
+    maxHeight,
+  )}px`;
+}
+
 function useAutoGrow(
   ref: RefObject<HTMLTextAreaElement | null>,
   { minHeight, maxHeight }: { minHeight: number; maxHeight: number },
@@ -61,11 +73,7 @@ function useAutoGrow(
     (textarea?: HTMLTextAreaElement | null) => {
       const element = textarea ?? ref.current;
       if (!element) return;
-      element.style.height = "auto";
-      element.style.height = `${Math.min(
-        Math.max(element.scrollHeight, minHeight),
-        maxHeight,
-      )}px`;
+      autoGrowTextarea(element, minHeight, maxHeight);
     },
     [maxHeight, minHeight, ref],
   );

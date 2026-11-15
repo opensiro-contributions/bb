@@ -136,11 +136,13 @@ export function ComposerRoot({
       reportMenuLayout({ height: 0, isOpen: false });
       return;
     }
-    let active = true;
-    let resizeObserver: ResizeObserver | null = null;
+    const subscription: {
+      active: boolean;
+      resizeObserver: ResizeObserver | null;
+    } = { active: true, resizeObserver: null };
     queueMicrotask(() => {
       const menu = menuRef?.current ?? null;
-      if (!active || menu === null) return;
+      if (!subscription.active || menu === null) return;
       const reportOpenLayout = () => {
         reportMenuLayout({
           height: menu.getBoundingClientRect().height,
@@ -149,12 +151,13 @@ export function ComposerRoot({
       };
       reportOpenLayout();
       if (typeof ResizeObserver === "undefined") return;
-      resizeObserver = new ResizeObserver(reportOpenLayout);
+      const resizeObserver = new ResizeObserver(reportOpenLayout);
       resizeObserver.observe(menu);
+      subscription.resizeObserver = resizeObserver;
     });
     return () => {
-      active = false;
-      resizeObserver?.disconnect();
+      subscription.active = false;
+      subscription.resizeObserver?.disconnect();
       reportMenuLayout({ height: 0, isOpen: false });
     };
   }, [menuOpen, menuRef, reportMenuLayout]);

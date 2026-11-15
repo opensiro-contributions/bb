@@ -575,13 +575,16 @@ const SidebarProvider = React.forwardRef<
       return scheduleSidebarMobileRealization(realizeMobileSidebar);
     }, [hasRealizedMobileSidebar, isCompactViewport, realizeMobileSidebar]);
 
-    React.useEffect(() => {
+    const [animationOpenMobile, setAnimationOpenMobile] =
+      React.useState(openMobile);
+    if (animationOpenMobile !== openMobile) {
+      setAnimationOpenMobile(openMobile);
       if (openMobile) {
         setSuppressMobileCloseAnimation(false);
       } else {
         setSuppressMobileOpenAnimation(false);
       }
-    }, [openMobile]);
+    }
 
     const [_open, _setOpen] = React.useState(defaultOpen);
     const open = openProp ?? _open;
@@ -1461,10 +1464,7 @@ const SidebarInset = React.forwardRef<
       }
 
       const touch = event.touches.item(0);
-      if (
-        touch == null ||
-        touch.clientX < browserNavigationEdgeGuardPx()
-      ) {
+      if (touch == null || touch.clientX < browserNavigationEdgeGuardPx()) {
         return;
       }
 

@@ -104,6 +104,7 @@ type EnterAction = "submit" | "modifier";
 
 interface SurfaceHarness {
   host: PluginComposerHost;
+  current: PromptDraftState;
   draft: () => PromptDraftState;
   onSubmit: () => void;
   onModifierSubmit: () => void;
@@ -208,19 +209,19 @@ function followUpSurface({
     customizable,
     enter,
     pluginSubmit,
-    render: ({ host, draft, onSubmit, onModifierSubmit }) => (
+    render: ({ host, current, draft, onSubmit, onModifierSubmit }) => (
       <FollowUpPromptBox
         attachments={{ items: [], projectId: "proj_contract" }}
         stack={null}
         composer={{
           history: {
-            currentDraft: draft(),
+            currentDraft: current,
             entries: [],
             onSelectEntry: () => {},
           },
           isFollowUpSubmitting: false,
-          message: draft().text,
-          mentionRanges: draft().mentions,
+          message: current.text,
+          mentionRanges: current.mentions,
           onChangeMessage: (text, mentions) =>
             host.setDraft({ ...draft(), text, mentions }),
           onSubmit,
@@ -311,10 +312,10 @@ const SURFACES: readonly Surface[] = [
     customizable: true,
     enter: "submit",
     pluginSubmit: "submit",
-    render: ({ host, draft, onSubmit }) => (
+    render: ({ host, current, draft, onSubmit }) => (
       <NewThreadPromptBoxUI
-        value={draft().text}
-        mentionRanges={draft().mentions}
+        value={current.text}
+        mentionRanges={current.mentions}
         onChange={(text, mentions) =>
           host.setDraft({ ...draft(), text, mentions })
         }
@@ -323,7 +324,7 @@ const SURFACES: readonly Surface[] = [
         disabled={false}
         pluginComposerHost={host}
         history={{
-          currentDraft: draft(),
+          currentDraft: current,
           entries: [],
           onSelectEntry: () => {},
         }}
@@ -401,11 +402,16 @@ function renderSurface(surface: Surface) {
   const onSubmit = vi.fn();
   const onModifierSubmit = vi.fn();
   function Harness() {
-    useSyncExternalStore(store.subscribe, store.draft, store.draft);
+    const current = useSyncExternalStore(
+      store.subscribe,
+      store.draft,
+      store.draft,
+    );
     return (
       <>
         {surface.render({
           host: store.host,
+          current,
           draft: store.draft,
           onSubmit,
           onModifierSubmit,

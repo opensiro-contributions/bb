@@ -108,9 +108,12 @@ export function useOverflowMeasurement({
   const [measurement, setMeasurement] =
     useState<OverflowMeasurement>("unmeasured");
 
+  if (!enabled && measurement !== "fits") {
+    setMeasurement("fits");
+  }
+
   useLayoutEffect(() => {
     if (!enabled) {
-      setMeasurement("fits");
       return;
     }
 

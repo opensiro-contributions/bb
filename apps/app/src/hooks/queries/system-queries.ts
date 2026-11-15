@@ -1,4 +1,6 @@
+import { useCallback, useSyncExternalStore } from "react";
 import {
+  partialMatchKey,
   queryOptions,
   useQueries,
   useQuery,
@@ -200,10 +202,10 @@ function shouldRetrySystemExecutionOptions(
   return true;
 }
 
-export function useKnownProviderModelCatalogScope(
+function readKnownProviderModelCatalogScope(
+  queryClient: QueryClient,
   providerId: string,
 ): ProviderModelCatalogScope | undefined {
-  const queryClient = useQueryClient();
   if (providerId.length === 0) {
     return undefined;
   }
@@ -229,6 +231,37 @@ export function useKnownProviderModelCatalogScope(
     }
   }
   return undefined;
+}
+
+function subscribeToProviderCatalogQueries(
+  queryClient: QueryClient,
+  onChange: () => void,
+): () => void {
+  const executionOptionsPrefix = allSystemExecutionOptionsQueryKeyPrefix();
+  const providersPrefix = allSystemProvidersQueryKeyPrefix();
+  return queryClient.getQueryCache().subscribe((event) => {
+    const { queryKey } = event.query;
+    if (
+      partialMatchKey(queryKey, executionOptionsPrefix) ||
+      partialMatchKey(queryKey, providersPrefix)
+    ) {
+      onChange();
+    }
+  });
+}
+
+export function useKnownProviderModelCatalogScope(
+  providerId: string,
+): ProviderModelCatalogScope | undefined {
+  const queryClient = useQueryClient();
+  const subscribe = useCallback(
+    (onChange: () => void) =>
+      subscribeToProviderCatalogQueries(queryClient, onChange),
+    [queryClient],
+  );
+  return useSyncExternalStore(subscribe, () =>
+    readKnownProviderModelCatalogScope(queryClient, providerId),
+  );
 }
 
 export function systemProvidersQueryOptions(args: UseSystemProvidersArgs = {}) {

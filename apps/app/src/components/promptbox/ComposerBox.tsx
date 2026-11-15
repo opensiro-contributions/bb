@@ -380,6 +380,17 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T | null): void {
   else if (ref) ref.current = value;
 }
 
+function createPromptBoxHandle(
+  getEditor: () => ExperimentalComposerEditor,
+): PromptBoxHandle {
+  return {
+    focusEnd: () => getEditor().focusEnd(),
+    get voice() {
+      return getEditor().voice ?? null;
+    },
+  };
+}
+
 function useComposerRendererHostApi({
   value,
   mentionRanges,
@@ -545,55 +556,56 @@ function useComposerRendererHostApi({
 
   const mentionTriggers =
     typeahead.mention.triggers ?? DEFAULT_MENTION_TRIGGERS;
-  const api: ExperimentalComposerRendererApi & RetiredComposerRendererMembers = {
-    input: {
-      ...input,
-      ...(maxHeight === undefined ? {} : { maxHeight }),
-      submission: composerSubmission(submission, onSubmit),
-      voice: composerVoice(voice),
-      mentionTriggers,
-      commandTriggers: typeahead.command.source.skillsTriggers.filter(
-        (trigger) => !mentionTriggers.some((mention) => mention === trigger),
-      ),
-      resolveMentionLink: mentionLinkResolver({
-        resolveLink: typeahead.mention.resolveLink,
-        attachments: draftAttachments,
-        attachmentProjectId: attachments?.projectId,
-        openAttachment,
-      }),
-      attachments: composerAttachments(attachments),
-      history: composerHistory(history),
-    },
-    view,
-    key,
-    inputLocked,
-    focusComposerShortcut,
-    decorationSources,
-    threadLinks: {
-      parse: (url) => parseThreadLink(url, window.location.origin),
-      cached: getCachedThreadLink,
-      resolve: (threadIds, signal, onBatch) =>
-        resolveThreadMentionsInBatches(
-          threadIds,
-          (batch, batchSignal) =>
-            sdk.threads.resolveMentions({
-              threadIds: batch,
-              signal: batchSignal,
-            }),
-          signal,
-          ({ threads }) => onBatch(threads),
+  const api: ExperimentalComposerRendererApi & RetiredComposerRendererMembers =
+    {
+      input: {
+        ...input,
+        ...(maxHeight === undefined ? {} : { maxHeight }),
+        submission: composerSubmission(submission, onSubmit),
+        voice: composerVoice(voice),
+        mentionTriggers,
+        commandTriggers: typeahead.command.source.skillsTriggers.filter(
+          (trigger) => !mentionTriggers.some((mention) => mention === trigger),
         ),
-    },
-    clipboard: {
-      readMessage: readMessageClipboardHtml,
-      readMessageImage: readMessageClipboardImage,
-    },
-    dispatchAppCommandKey,
-    showError: (message) => appToast.error(message),
-    attachmentSrc: (path, projectId) =>
-      getLocalAttachmentPreviewSrc(path) ??
-      toUserAttachmentImageSrc(path, projectId),
-  };
+        resolveMentionLink: mentionLinkResolver({
+          resolveLink: typeahead.mention.resolveLink,
+          attachments: draftAttachments,
+          attachmentProjectId: attachments?.projectId,
+          openAttachment,
+        }),
+        attachments: composerAttachments(attachments),
+        history: composerHistory(history),
+      },
+      view,
+      key,
+      inputLocked,
+      focusComposerShortcut,
+      decorationSources,
+      threadLinks: {
+        parse: (url) => parseThreadLink(url, window.location.origin),
+        cached: getCachedThreadLink,
+        resolve: (threadIds, signal, onBatch) =>
+          resolveThreadMentionsInBatches(
+            threadIds,
+            (batch, batchSignal) =>
+              sdk.threads.resolveMentions({
+                threadIds: batch,
+                signal: batchSignal,
+              }),
+            signal,
+            ({ threads }) => onBatch(threads),
+          ),
+      },
+      clipboard: {
+        readMessage: readMessageClipboardHtml,
+        readMessageImage: readMessageClipboardImage,
+      },
+      dispatchAppCommandKey,
+      showError: (message) => appToast.error(message),
+      attachmentSrc: (path, projectId) =>
+        getLocalAttachmentPreviewSrc(path) ??
+        toUserAttachmentImageSrc(path, projectId),
+    };
   const getEditorRef = useRef<(() => ExperimentalComposerEditor) | null>(null);
   const lastFocusEndKeyRef = useRef(focusEndKey);
   useLayoutEffect(() => {
@@ -604,12 +616,7 @@ function useComposerRendererHostApi({
   }, [focusEndKey]);
   const attachEditor: ComposerRootHost["attachEditor"] = (getEditor) => {
     getEditorRef.current = getEditor;
-    assignRef(promptBoxRef, {
-      focusEnd: () => getEditor().focusEnd(),
-      get voice() {
-        return getEditor().voice ?? null;
-      },
-    });
+    assignRef(promptBoxRef, createPromptBoxHandle(getEditor));
     return () => {
       getEditorRef.current = null;
       assignRef(promptBoxRef, null);

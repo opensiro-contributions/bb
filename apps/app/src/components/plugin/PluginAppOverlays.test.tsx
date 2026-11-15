@@ -71,13 +71,15 @@ vi.mock("@/hooks/queries/sidebar-navigation-query", () => ({
   }),
 }));
 
+const useSidebarThreadActions =
+  pluginSdkAppImplementation.experimental_useSidebarThreadActions;
+
 function PortaledProbe() {
   const context = useBbContext();
   const navigate = useBbNavigate();
   const rpc = useRpc();
   const settings = useSettings();
-  const sidebarThreadActions =
-    pluginSdkAppImplementation.experimental_useSidebarThreadActions();
+  const sidebarThreadActions = useSidebarThreadActions();
   const [rpcResult, setRpcResult] = useState("idle");
 
   return (
