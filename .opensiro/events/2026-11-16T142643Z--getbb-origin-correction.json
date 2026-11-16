@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "2026-11-16T142643Z--getbb-origin-correction",
+  "recorded_at": "2026-11-16T14:26:43Z",
+  "actor": "OpenSiro assistant, acting on explicit current-conversation owner request",
+  "kind": "CORRECTION",
+  "contribution_id": "getbb-worktree-archive-safety-20261116",
+  "decision": "CLASSIFY_GENERAL_UPSTREAM",
+  "prior_classification": "UNCLASSIFIED_LEGACY",
+  "new_classification": "GENERAL_UPSTREAM",
+  "correction_of": "https://github.com/opensiro-contributions/bb/blob/9dd8f50666556da6163b3d3f5c7488ef79f828ba/.opensiro/contributions/getbb-worktree-archive-safety-20261116.json",
+  "evidence_urls": [
+    "https://github.com/get-bb/bb/issues/5952",
+    "https://github.com/get-bb/bb/pull/5957",
+    "https://github.com/opensiro-contributions/bb/blob/9dd8f50666556da6163b3d3f5c7488ef79f828ba/.opensiro/contributions/getbb-worktree-archive-safety-20261116.json"
+  ],
+  "notes": "Original first-party issue and earlier PR substantiate source-first origin. No pre-existing pinned Index-first prediction demonstrated. Owner-control stays PAUSE and attention DORMANT; the one-off owner-requested metadata correction grants neither general RESUME nor external publication.",
+  "next_action": "Original issue #5952 still open; obtain maintainer sign-off for any feature/UI proposal, and an explicit OpenSiro owner RESUME before new effectful product work. Verify current source-native counterfactual and prior PR #5957 before implementing."
+}

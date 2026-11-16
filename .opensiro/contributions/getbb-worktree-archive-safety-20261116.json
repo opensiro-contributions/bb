@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "getbb-worktree-archive-safety-20261116",
   "original_repository": "get-bb/bb",
   "legacy_sources": [],
@@ -10,5 +10,11 @@
   "native_evidence": [],
   "work_branches": [],
   "external_prs": [],
-  "last_event_id": null
+  "last_event_id": "2026-11-16T142643Z--getbb-origin-correction",
+  "contribution_type": "GENERAL_UPSTREAM",
+  "classification_rationale": "The loss-of-work archive behavior was reported directly in original get-bb/bb issue #5952 before this OpenSiro intervention; its prior attempt in original PR #5957 was closed unmerged. No pinned earlier Index-first prediction is established, and this source-first repair is not claimed as VSM-derived.",
+  "classification_evidence": [
+    "https://github.com/get-bb/bb/issues/5952",
+    "https://github.com/get-bb/bb/pull/5957"
+  ]
 }
