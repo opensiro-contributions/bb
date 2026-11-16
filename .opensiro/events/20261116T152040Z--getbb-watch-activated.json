@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "20261116T152040Z--getbb-watch-activated",
+  "recorded_at": "2026-11-16T15:20:40.692Z",
+  "actor": "OpenSiro owner (requested monitoring in current conversation), executed by OpenSiro assistant",
+  "kind": "DECISION",
+  "contribution_id": "getbb-worktree-archive-safety-20261116",
+  "decision": "WATCHING",
+  "previous_attention": "DORMANT",
+  "new_attention": "WATCHING",
+  "owner_control_unchanged": "PAUSE",
+  "scope": "Observe existing public issue and maintainer replies only; no new engineering, contact, or PR rights",
+  "tracking_target": "https://github.com/get-bb/bb/issues/5952",
+  "operator_comment": "https://github.com/get-bb/bb/issues/5952#issuecomment-6919385474",
+  "automation_id": "6afb1f08a9348191810bce10d74cca98",
+  "evidence_urls": [
+    "https://github.com/get-bb/bb/issues/5952#issuecomment-6919385474",
+    "https://github.com/get-bb/bb/pull/5957",
+    "https://github.com/opensiro/upstream/issues/16"
+  ],
+  "next_action": "Observe first-party get-bb/bb issue #5952 after OpenSiro's comment https://github.com/get-bb/bb/issues/5952#issuecomment-6919385474 for a specific maintainer decision. Daily conditional monitoring is active (automation 6afb1f08a9348191810bce10d74cca98). Maintain BLOCKED and owner-control PAUSE; do not implement, publish any fork PR, or contact maintainers again without separate authorization. Verify current source and prior PR #5957 before any eventual new product work."
+}
