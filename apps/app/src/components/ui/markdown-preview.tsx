@@ -125,6 +125,7 @@ import {
   resolveMarkdownPieces,
   type MarkdownPieceRenderConfig,
 } from "./markdown-incremental-pieces.js";
+import { PAGE_CONTAINER_INSET_END_VARIABLE } from "./page-shell-content-style.js";
 import { normalizePromptBlockquoteBoundaries } from "./markdown-prompt-blockquote-boundaries.js";
 import { MarkdownMermaidDiagram } from "./markdown-mermaid-diagram.js";
 import type { PromptTextMention } from "@bb/domain";
@@ -313,7 +314,8 @@ type MarkdownRehypePlugins = NonNullable<ReactMarkdownOptions["rehypePlugins"]>;
 type MarkdownRemarkPlugins = NonNullable<ReactMarkdownOptions["remarkPlugins"]>;
 
 const MARKDOWN_TABLE_BREAKOUT_LIMIT_VARIABLE = "--md-table-breakout-max";
-const MARKDOWN_TABLE_BREAKOUT_WIDTH = `max(100%, min(1100px, 100cqw - 2rem, var(${MARKDOWN_TABLE_BREAKOUT_LIMIT_VARIABLE}, 100cqw)))`;
+const MARKDOWN_PAGE_WIDTH = `(100cqw + var(${PAGE_CONTAINER_INSET_END_VARIABLE}, 0px))`;
+const MARKDOWN_TABLE_BREAKOUT_WIDTH = `max(100%, min(1100px, ${MARKDOWN_PAGE_WIDTH} - 2rem, var(${MARKDOWN_TABLE_BREAKOUT_LIMIT_VARIABLE}, ${MARKDOWN_PAGE_WIDTH})))`;
 const MARKDOWN_TABLE_BREAKOUT_START_MARGIN = `var(${MARKDOWN_TABLE_START_OFFSET_VARIABLE}, calc((100% - ${MARKDOWN_TABLE_BREAKOUT_WIDTH}) / 2))`;
 const MARKDOWN_CONTENT_WIDTH_VARIABLE = "--md-content-w";
 const MARKDOWN_SOURCE_COLOR_SCHEME_MEDIA_PATTERN =
@@ -1526,9 +1528,13 @@ function setMarkdownContentWidthVariable({
   element.style.setProperty(MARKDOWN_CONTENT_WIDTH_VARIABLE, `${width}px`);
 }
 
+type MarkdownTableClip =
+  | { kind: "unresolved" }
+  | { kind: "resolved"; element: HTMLElement | null };
+
 interface MarkdownTableGeometryRegistration {
   breakout: HTMLElement;
-  clip: HTMLElement | null;
+  clip: MarkdownTableClip;
   content: HTMLElement;
   lastClipWidth: number;
   lastContentWidth: number;
@@ -1556,7 +1562,8 @@ function measureMarkdownTableGeometry(
 ): void {
   const measurements: MarkdownTableGeometryMeasurement[] = [];
   for (const registration of registrations) {
-    const { breakout, clip, content } = registration;
+    const { breakout, content } = registration;
+    const clip = resolveMarkdownTableClip(registration);
     const contentWidth = content.getBoundingClientRect().width;
     const clipWidth = clip?.clientWidth ?? -1;
     if (
@@ -1599,25 +1606,51 @@ function getSharedMarkdownTableResizeObserver(): ResizeObserver {
   return sharedMarkdownTableResizeObserver;
 }
 
+function resolveMarkdownTableClip(
+  registration: MarkdownTableGeometryRegistration,
+): HTMLElement | null {
+  if (registration.clip.kind === "resolved") {
+    return registration.clip.element;
+  }
+  const element = findHorizontalClipAncestor(registration.content);
+  registration.clip = { kind: "resolved", element };
+  if (
+    element !== null &&
+    element !== registration.content &&
+    markdownTableRegistrationsByElement
+      .get(registration.content)
+      ?.has(registration) === true
+  ) {
+    addMarkdownTableGeometryElement(element, registration);
+  }
+  return element;
+}
+
+function addMarkdownTableGeometryElement(
+  element: HTMLElement,
+  registration: MarkdownTableGeometryRegistration,
+): void {
+  let registrations = markdownTableRegistrationsByElement.get(element);
+  if (!registrations) {
+    registrations = new Set();
+    markdownTableRegistrationsByElement.set(element, registrations);
+    getSharedMarkdownTableResizeObserver().observe(element);
+  }
+  registrations.add(registration);
+}
+
 function observeMarkdownTableGeometry(
   registration: MarkdownTableGeometryRegistration,
 ): () => void {
-  const elements =
-    registration.clip === null || registration.clip === registration.content
-      ? [registration.content]
-      : [registration.content, registration.clip];
-  const observer = getSharedMarkdownTableResizeObserver();
-  for (const element of elements) {
-    let registrations = markdownTableRegistrationsByElement.get(element);
-    if (!registrations) {
-      registrations = new Set();
-      markdownTableRegistrationsByElement.set(element, registrations);
-      observer.observe(element);
-    }
-    registrations.add(registration);
-  }
+  addMarkdownTableGeometryElement(registration.content, registration);
 
   return () => {
+    const clip =
+      registration.clip.kind === "resolved" ? registration.clip.element : null;
+    const elements =
+      clip === null || clip === registration.content
+        ? [registration.content]
+        : [registration.content, clip];
     for (const element of elements) {
       const registrations = markdownTableRegistrationsByElement.get(element);
       registrations?.delete(registration);
@@ -1642,10 +1675,9 @@ function useMarkdownTableContentWidthVariable() {
     if (!breakout || !content) {
       return;
     }
-    const clip = findHorizontalClipAncestor(content);
     const registration: MarkdownTableGeometryRegistration = {
       breakout,
-      clip,
+      clip: { kind: "unresolved" },
       content,
       lastClipWidth: -1,
       lastContentWidth: -1,
