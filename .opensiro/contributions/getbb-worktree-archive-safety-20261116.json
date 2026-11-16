@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "getbb-worktree-archive-safety-20261116",
+  "original_repository": "get-bb/bb",
+  "legacy_sources": [],
+  "title": "Prevent loss of work when archiving a Git-worktree thread",
+  "work_state": "BLOCKED",
+  "next_action": "Original issue #5952 still open; obtain maintainer sign-off for any feature/UI proposal, and an explicit OpenSiro owner RESUME before new effectful product work. Verify current source-native counterfactual and prior PR #5957 before implementing.",
+  "source_revision": "da3e60b81d560e114a2bec724bb59c997aaaae7f",
+  "native_evidence": [],
+  "work_branches": [],
+  "external_prs": [],
+  "last_event_id": null
+}
